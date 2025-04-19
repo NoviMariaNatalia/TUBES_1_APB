@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-// Uncomment these imports when you create the page files
 // import 'dashboard_page.dart';
 // import 'profile_page.dart';
 // import 'login_page.dart';
@@ -22,7 +21,7 @@ class _RoomListPageState extends State<RoomListPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // App bar with logo and profile picture
+            // App bar untuk logo dan foto profil
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
@@ -39,11 +38,11 @@ class _RoomListPageState extends State<RoomListPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Logo - Navigate to dashboard when clicked
+                  // Logo
                   GestureDetector(
                     onTap: () {
                       // Navigasi ke dashboard
-                      // Uncomment ketika dashboard_page.dart sudah dibuat
+                      // digunakan jika dashboard_page.dart sudah dibuat
                       // Navigator.push(
                       //   context,
                       //   MaterialPageRoute(builder: (context) => const DashboardPage()),
@@ -55,8 +54,7 @@ class _RoomListPageState extends State<RoomListPage> {
                       height: 40,
                     ),
                   ),
-                  // Profile picture with dropdown menu
-                  // Profile picture with popup menu
+                  // Foto Profil
                   PopupMenuButton(
                     offset: const Offset(0, 50),
                     icon: const CircleAvatar(
@@ -66,9 +64,8 @@ class _RoomListPageState extends State<RoomListPage> {
                       ),
                     ),
                     itemBuilder: (context) => [
-                      // Header item with user info
                       PopupMenuItem(
-                        enabled: false, // Tidak bisa diklik
+                        enabled: false,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -91,7 +88,6 @@ class _RoomListPageState extends State<RoomListPage> {
                           ],
                         ),
                       ),
-                      // Profile menu item
                       PopupMenuItem(
                         child: const Row(
                           children: [
@@ -102,14 +98,14 @@ class _RoomListPageState extends State<RoomListPage> {
                         ),
                         onTap: () {
                           print('Navigate to Profile');
-                          // Uncomment ketika profile_page.dart sudah dibuat
+                          // Navigasi ke profil mahasiswa
+                          // digunakan jika profile_page.dart sudah dibuat
                           // Navigator.push(
                           //   context,
                           //   MaterialPageRoute(builder: (context) => const ProfilePage()),
                           // );
                         },
                       ),
-                      // Logout menu item
                       PopupMenuItem(
                         child: const Row(
                           children: [
@@ -120,7 +116,8 @@ class _RoomListPageState extends State<RoomListPage> {
                         ),
                         onTap: () {
                           print('Navigate to Login');
-                          // Uncomment ketika login_page.dart sudah dibuat
+                          // Navigasi ke login
+                          // digunakan jika login_page.dart sudah dibuat
                           // Navigator.pushAndRemoveUntil(
                           //   context,
                           //   MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -134,7 +131,7 @@ class _RoomListPageState extends State<RoomListPage> {
               ),
             ),
 
-            // Page title
+            // Judul Halaman
             Container(
               padding: const EdgeInsets.all(16),
               child: const Text(
@@ -147,7 +144,7 @@ class _RoomListPageState extends State<RoomListPage> {
               ),
             ),
 
-            // Room list using GridView
+            // Daftar Ruangan
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -223,7 +220,6 @@ class _RoomListPageState extends State<RoomListPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Room image
           Expanded(
             child: ClipRRect(
               borderRadius: const BorderRadius.only(
@@ -237,7 +233,6 @@ class _RoomListPageState extends State<RoomListPage> {
             ),
           ),
 
-          // Room details
           Container(
             padding: const EdgeInsets.all(12),
             child: Column(
@@ -271,7 +266,7 @@ class _RoomListPageState extends State<RoomListPage> {
                 ElevatedButton(
                   onPressed: () {
                     // Navigasi ke form peminjaman ruangan
-                    // Uncomment ketika booking_form_page.dart sudah dibuat
+                    // digunakan jika booking_form_page.dart sudah dibuat
                     // Navigator.push(
                     //   context,
                     //   MaterialPageRoute(
