@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// import 'dashboard_page.dart';
+// import 'BuildingDashboardPage.dart';
 // import 'profile_page.dart';
 // import 'login_page.dart';
 // import 'booking_form_page.dart';
@@ -49,10 +49,7 @@ class _RoomListPageState extends State<RoomListPage> {
                       // );
                       print('Navigate to Dashboard');
                     },
-                    child: Image.asset(
-                      'assets/images/logo.png',
-                      height: 40,
-                    ),
+                    child: Image.asset('assets/images/logo.png', height: 40),
                   ),
                   // Foto Profil
                   PopupMenuButton(
@@ -63,69 +60,70 @@ class _RoomListPageState extends State<RoomListPage> {
                         'assets/images/foto-profil-mahasiswa.jpg',
                       ),
                     ),
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        enabled: false,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Jack Smith',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.blue[900],
-                              ),
+                    itemBuilder:
+                        (context) => [
+                          PopupMenuItem(
+                            enabled: false,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Jack Smith',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: Colors.blue[900],
+                                  ),
+                                ),
+                                const Text(
+                                  'Mahasiswa',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                const Divider(),
+                              ],
                             ),
-                            const Text(
-                              'Mahasiswa',
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 12,
-                              ),
+                          ),
+                          PopupMenuItem(
+                            child: const Row(
+                              children: [
+                                Icon(Icons.person_outline, size: 20),
+                                SizedBox(width: 10),
+                                Text('Profil Saya'),
+                              ],
                             ),
-                            const Divider(),
-                          ],
-                        ),
-                      ),
-                      PopupMenuItem(
-                        child: const Row(
-                          children: [
-                            Icon(Icons.person_outline, size: 20),
-                            SizedBox(width: 10),
-                            Text('Profil Saya'),
-                          ],
-                        ),
-                        onTap: () {
-                          print('Navigate to Profile');
-                          // Navigasi ke profil mahasiswa
-                          // digunakan jika profile_page.dart sudah dibuat
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(builder: (context) => const ProfilePage()),
-                          // );
-                        },
-                      ),
-                      PopupMenuItem(
-                        child: const Row(
-                          children: [
-                            Icon(Icons.logout, size: 20),
-                            SizedBox(width: 10),
-                            Text('Keluar'),
-                          ],
-                        ),
-                        onTap: () {
-                          print('Navigate to Login');
-                          // Navigasi ke login
-                          // digunakan jika login_page.dart sudah dibuat
-                          // Navigator.pushAndRemoveUntil(
-                          //   context,
-                          //   MaterialPageRoute(builder: (context) => const LoginPage()),
-                          //   (route) => false,
-                          // );
-                        },
-                      ),
-                    ],
+                            onTap: () {
+                              print('Navigate to Profile');
+                              // Navigasi ke profil mahasiswa
+                              // digunakan jika profile_page.dart sudah dibuat
+                              // Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(builder: (context) => const ProfilePage()),
+                              // );
+                            },
+                          ),
+                          PopupMenuItem(
+                            child: const Row(
+                              children: [
+                                Icon(Icons.logout, size: 20),
+                                SizedBox(width: 10),
+                                Text('Keluar'),
+                              ],
+                            ),
+                            onTap: () {
+                              print('Navigate to Login');
+                              // Navigasi ke login
+                              // digunakan jika login_page.dart sudah dibuat
+                              // Navigator.pushAndRemoveUntil(
+                              //   context,
+                              //   MaterialPageRoute(builder: (context) => const LoginPage()),
+                              //   (route) => false,
+                              // );
+                            },
+                          ),
+                        ],
                   ),
                 ],
               ),
@@ -152,27 +150,18 @@ class _RoomListPageState extends State<RoomListPage> {
                   crossAxisCount: 2,
                   childAspectRatio: 0.8,
                   children: [
-                    _buildRoomCard(
-                      'VIP A',
-                      'vipA-gsg.png',
-                      1,
-                      50,
-                      ['AC', 'Proyektor'],
-                    ),
-                    _buildRoomCard(
-                      'VIP B',
-                      'vipB-gsg.png',
-                      2,
-                      50,
-                      ['AC', 'Toilet'],
-                    ),
-                    _buildRoomCard(
-                      'VIP C',
-                      'vipC-gsg.png',
-                      3,
-                      50,
-                      ['AC', 'Proyektor'],
-                    ),
+                    _buildRoomCard('VIP A', 'vipA-gsg.png', 1, 50, [
+                      'AC',
+                      'Proyektor',
+                    ]),
+                    _buildRoomCard('VIP B', 'vipB-gsg.png', 2, 50, [
+                      'AC',
+                      'Toilet',
+                    ]),
+                    _buildRoomCard('VIP C', 'vipC-gsg.png', 3, 50, [
+                      'AC',
+                      'Proyektor',
+                    ]),
                     _buildRoomCard(
                       'LAPANGAN TIMUR GSG',
                       'lapanganTimur-gsg.png',
@@ -187,13 +176,10 @@ class _RoomListPageState extends State<RoomListPage> {
                       50,
                       [],
                     ),
-                    _buildRoomCard(
-                      'AULA GSG',
-                      'aula-gsg.png',
-                      1,
-                      50,
-                      ['Toilet', 'Proyektor'],
-                    ),
+                    _buildRoomCard('AULA GSG', 'aula-gsg.png', 1, 50, [
+                      'Toilet',
+                      'Proyektor',
+                    ]),
                   ],
                 ),
               ),
@@ -205,17 +191,15 @@ class _RoomListPageState extends State<RoomListPage> {
   }
 
   Widget _buildRoomCard(
-      String name,
-      String image,
-      int floor,
-      int capacity,
-      List<String> facilities,
-      ) {
+    String name,
+    String image,
+    int floor,
+    int capacity,
+    List<String> facilities,
+  ) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       margin: const EdgeInsets.all(8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -226,10 +210,7 @@ class _RoomListPageState extends State<RoomListPage> {
                 topLeft: Radius.circular(10),
                 topRight: Radius.circular(10),
               ),
-              child: Image.asset(
-                'assets/images/$image',
-                fit: BoxFit.cover,
-              ),
+              child: Image.asset('assets/images/$image', fit: BoxFit.cover),
             ),
           ),
 
@@ -248,10 +229,7 @@ class _RoomListPageState extends State<RoomListPage> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  'Lantai: $floor',
-                  style: const TextStyle(fontSize: 12),
-                ),
+                Text('Lantai: $floor', style: const TextStyle(fontSize: 12)),
                 Text(
                   'Kapasitas: $capacity',
                   style: const TextStyle(fontSize: 12),
@@ -284,7 +262,10 @@ class _RoomListPageState extends State<RoomListPage> {
                   ),
                   child: const Text(
                     'Cek Ketersediaan',
-                    style: TextStyle(fontSize: 12, color: Colors.white), // Warna teks putih
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white,
+                    ), // Warna teks putih
                   ),
                 ),
               ],

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'pages/room_list_page.dart';
+import 'pages/BuildingDashboardPage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: Colors.grey[100],
       ),
-      home: const RoomListPage(),
+      home: const BuildingDashboardPage(),
       debugShowCheckedModeBanner: false,
     );
   }
