@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-// import 'room_list_page.dart';
+import 'room_list_page.dart';
 // import 'profile_page.dart';
 // import 'login_page.dart';
 
@@ -202,9 +202,13 @@ class _BuildingDashboardPageState extends State<BuildingDashboardPage> {
                 const SizedBox(height: 8),
                 ElevatedButton(
                   onPressed: () {
-                    _focusToLocation(
-                      location,
-                    ); // Fokus ke marker saat tombol diklik
+                    // Navigasi ke halaman daftar ruangan
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const RoomListPage(),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1E3A8A),
