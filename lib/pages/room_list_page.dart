@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-// import 'BuildingDashboardPage.dart';
+import 'BuildingDashboardPage.dart';
 // import 'profile_page.dart';
 // import 'login_page.dart';
-// import 'booking_form_page.dart';
+import 'RoomBookingPage.dart';
 
 class RoomListPage extends StatefulWidget {
   const RoomListPage({Key? key}) : super(key: key);
@@ -39,18 +39,20 @@ class _RoomListPageState extends State<RoomListPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // Logo
+                  // Di dalam Container (Header bagian atas)
                   GestureDetector(
                     onTap: () {
-                      // Navigasi ke dashboard
-                      // digunakan jika dashboard_page.dart sudah dibuat
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(builder: (context) => const DashboardPage()),
-                      // );
-                      print('Navigate to Dashboard');
+                      // Navigasi ke halaman Dashboard
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const BuildingDashboardPage(),
+                        ),
+                      );
                     },
                     child: Image.asset('assets/images/logo.png', height: 40),
                   ),
+
                   // Foto Profil
                   PopupMenuButton(
                     offset: const Offset(0, 50),
@@ -243,16 +245,15 @@ class _RoomListPageState extends State<RoomListPage> {
                 const SizedBox(height: 8),
                 ElevatedButton(
                   onPressed: () {
-                    // Navigasi ke form peminjaman ruangan
-                    // digunakan jika booking_form_page.dart sudah dibuat
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (context) => BookingFormPage(roomName: name),
-                    //   ),
-                    // );
-                    print('Navigate to booking form for $name');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => RoomBookingPage(selectedRoom: name),
+                      ),
+                    );
                   },
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1E3A8A),
                     shape: RoundedRectangleBorder(
