@@ -219,7 +219,7 @@ class _BuildingDashboardPageState extends State<BuildingDashboardPage> {
                   ),
                   child: const Text(
                     'Lihat Ruangan',
-                    style: TextStyle(fontSize: 12),
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ],
