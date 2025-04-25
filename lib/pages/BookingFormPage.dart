@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'BookingHistoryPage.dart';
 import 'package:tubes1_apb/models/booking_model.dart';
+import '../widgets/custom_app_bar.dart';
 
 class BookingFormPage extends StatefulWidget {
   final String roomName;
@@ -208,32 +209,7 @@ class _BookingFormPageState extends State<BookingFormPage> {
         child: Column(
           children: [
             // Custom AppBar
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    spreadRadius: 1,
-                    blurRadius: 2,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Image.asset('assets/images/logo.png', height: 40),
-                  const CircleAvatar(
-                    backgroundImage: AssetImage(
-                      'assets/images/foto-profil-mahasiswa.jpg',
-                    ),
-                    radius: 20,
-                  ),
-                ],
-              ),
-            ),
+            const CustomAppBar(),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16),
