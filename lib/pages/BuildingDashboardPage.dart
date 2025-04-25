@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'room_list_page.dart';
-// import 'profile_page.dart';
-// import 'login_page.dart';
+import 'profile_mahasiswa_page.dart';
+import '../widgets/custom_app_bar.dart';
+import 'login.dart';
 
 class BuildingDashboardPage extends StatefulWidget {
   const BuildingDashboardPage({super.key});
@@ -64,32 +65,7 @@ class _BuildingDashboardPageState extends State<BuildingDashboardPage> {
         child: Column(
           children: [
             // AppBar
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    spreadRadius: 1,
-                    blurRadius: 2,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Image.asset('assets/images/logo.png', height: 40),
-                  const CircleAvatar(
-                    backgroundImage: AssetImage(
-                      'assets/images/foto-profil-mahasiswa.jpg',
-                    ),
-                    radius: 20,
-                  ),
-                ],
-              ),
-            ),
+            const CustomAppBar(),
 
             // Judul
             Container(
@@ -125,19 +101,18 @@ class _BuildingDashboardPageState extends State<BuildingDashboardPage> {
                       userAgentPackageName: 'com.amanda.dashboardgedung',
                     ),
                     MarkerLayer(
-                      markers:
-                          buildings.map((b) {
-                            return Marker(
-                              point: b['location'],
-                              width: 60,
-                              height: 60,
-                              child: const Icon(
-                                Icons.location_on,
-                                size: 32,
-                                color: Colors.red,
-                              ),
-                            );
-                          }).toList(),
+                      markers: buildings.map((b) {
+                        return Marker(
+                          point: b['location'],
+                          width: 60,
+                          height: 60,
+                          child: const Icon(
+                            Icons.location_on,
+                            size: 32,
+                            color: Colors.red,
+                          ),
+                        );
+                      }).toList(),
                     ),
                   ],
                 ),
@@ -153,14 +128,13 @@ class _BuildingDashboardPageState extends State<BuildingDashboardPage> {
                 child: GridView.count(
                   crossAxisCount: 2,
                   childAspectRatio: 0.8,
-                  children:
-                      buildings.map((b) {
-                        return _buildBuildingCard(
-                          b['name'],
-                          b['image'],
-                          b['location'],
-                        );
-                      }).toList(),
+                  children: buildings.map((b) {
+                    return _buildBuildingCard(
+                      b['name'],
+                      b['image'],
+                      b['location'],
+                    );
+                  }).toList(),
                 ),
               ),
             ),
