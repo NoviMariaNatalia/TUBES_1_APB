@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'BuildingDashboardPage.dart';
 import 'profile_mahasiswa_page.dart';
 import 'login.dart';
-import 'RoomBookingPage.dart';
+import 'BookingFormPage.dart';
 
 class RoomListPage extends StatefulWidget {
   const RoomListPage({Key? key}) : super(key: key);
@@ -62,68 +62,70 @@ class _RoomListPageState extends State<RoomListPage> {
                         'assets/images/foto-profil-mahasiswa.jpg',
                       ),
                     ),
-                    itemBuilder:
-                        (context) => [
-                          PopupMenuItem(
-                            enabled: false,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Jack Smith',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: Colors.blue[900],
-                                  ),
-                                ),
-                                const Text(
-                                  'Mahasiswa',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                const Divider(),
-                              ],
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        enabled: false,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Jack Smith',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Colors.blue[900],
+                              ),
                             ),
-                          ),
-                          PopupMenuItem(
-                            child: const Row(
-                              children: [
-                                Icon(Icons.person_outline, size: 20),
-                                SizedBox(width: 10),
-                                Text('Profil Saya'),
-                              ],
+                            const Text(
+                              'Mahasiswa',
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 12,
+                              ),
                             ),
-                            onTap: () {
-                              print('Navigate to Profile');
-                              // Navigasi ke profil mahasiswa
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const ProfilMahasiswaPage()),
-                              );
-                            },
-                          ),
-                          PopupMenuItem(
-                            child: const Row(
-                              children: [
-                                Icon(Icons.logout, size: 20),
-                                SizedBox(width: 10),
-                                Text('Keluar'),
-                              ],
-                            ),
-                            onTap: () {
-                              print('Navigate to Login');
-                              // Navigasi ke login
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(builder: (context) => const LoginPage()),
-                                (route) => false,
-                              );
-                            },
-                          ),
-                        ],
+                            const Divider(),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        child: const Row(
+                          children: [
+                            Icon(Icons.person_outline, size: 20),
+                            SizedBox(width: 10),
+                            Text('Profil Saya'),
+                          ],
+                        ),
+                        onTap: () {
+                          print('Navigate to Profile');
+                          // Navigasi ke profil mahasiswa
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const ProfilMahasiswaPage()),
+                          );
+                        },
+                      ),
+                      PopupMenuItem(
+                        child: const Row(
+                          children: [
+                            Icon(Icons.logout, size: 20),
+                            SizedBox(width: 10),
+                            Text('Keluar'),
+                          ],
+                        ),
+                        onTap: () {
+                          print('Navigate to Login');
+                          // Navigasi ke login
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const LoginPage()),
+                            (route) => false,
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -213,7 +215,6 @@ class _RoomListPageState extends State<RoomListPage> {
               child: Image.asset('assets/images/$image', fit: BoxFit.cover),
             ),
           ),
-
           Container(
             padding: const EdgeInsets.all(12),
             child: Column(
@@ -246,12 +247,10 @@ class _RoomListPageState extends State<RoomListPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder:
-                            (context) => RoomBookingPage(selectedRoom: name),
+                        builder: (context) => BookingFormPage(roomName: name),
                       ),
                     );
                   },
-
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1E3A8A),
                     shape: RoundedRectangleBorder(
