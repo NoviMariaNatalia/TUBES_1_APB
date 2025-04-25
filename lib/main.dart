@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'pages/BuildingDashboardPage.dart';
 import 'pages/login.dart';
+import 'pages/profile_mahasiswa_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,6 +21,8 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const LoginPage(),
+        '/dashboard': (context) => const BuildingDashboardPage(),
+        '/profil-mahasiswa': (context) => const ProfilMahasiswaPage(),
         // Tambahkan rute lainnya di sini jika perlu
       },
     );
