@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'BuildingDashboardPage.dart';
-// import 'profile_page.dart';
-// import 'login_page.dart';
+import 'profile_mahasiswa_page.dart';
+import 'login.dart';
 import 'RoomBookingPage.dart';
 
 class RoomListPage extends StatefulWidget {
@@ -99,11 +99,10 @@ class _RoomListPageState extends State<RoomListPage> {
                             onTap: () {
                               print('Navigate to Profile');
                               // Navigasi ke profil mahasiswa
-                              // digunakan jika profile_page.dart sudah dibuat
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(builder: (context) => const ProfilePage()),
-                              // );
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const ProfilMahasiswaPage()),
+                              );
                             },
                           ),
                           PopupMenuItem(
@@ -117,12 +116,11 @@ class _RoomListPageState extends State<RoomListPage> {
                             onTap: () {
                               print('Navigate to Login');
                               // Navigasi ke login
-                              // digunakan jika login_page.dart sudah dibuat
-                              // Navigator.pushAndRemoveUntil(
-                              //   context,
-                              //   MaterialPageRoute(builder: (context) => const LoginPage()),
-                              //   (route) => false,
-                              // );
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(builder: (context) => const LoginPage()),
+                                (route) => false,
+                              );
                             },
                           ),
                         ],

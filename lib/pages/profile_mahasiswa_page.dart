@@ -8,45 +8,47 @@ class ProfilMahasiswaPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: [
-            const CustomAppBar(), // tetap pakai app bar atas yang sama
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // FOTO + Nama
-                  Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      width: 220,
-                      child: Column(
-                        children: [
-                          const CircleAvatar(
-                            backgroundImage: AssetImage(
-                                'assets/images/foto-profil-mahasiswa.jpg'),
-                            radius: 40,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const CustomAppBar(),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column( // Ganti Row menjadi Column untuk layout vertikal
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // FOTO + Nama
+                    Center(
+                      child: Card(
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          width: 220,
+                          child: Column(
+                            children: [
+                              const CircleAvatar(
+                                backgroundImage: AssetImage(
+                                    'assets/images/foto-profil-mahasiswa.jpg'),
+                                radius: 40,
+                              ),
+                              const SizedBox(height: 12),
+                              const Text(
+                                'Jack Smith',
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                              const Text('Mahasiswa'),
+                            ],
                           ),
-                          const SizedBox(height: 12),
-                          const Text(
-                            'Jack Smith',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          const Text('Mahasiswa'),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 20),
-                  // Detail Profil
-                  Expanded(
-                    child: Card(
+                    const SizedBox(height: 20),
+                    // Detail Profil
+                    Card(
                       elevation: 2,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
@@ -71,11 +73,12 @@ class ProfilMahasiswaPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                  )
-                ],
+                  ],
+                ),
               ),
-            )
-          ],
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
@@ -94,9 +97,21 @@ class ProfileDetailRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         children: [
-          SizedBox(width: 120, child: Text(label)),
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+          ),
           const Text(': '),
-          Expanded(child: Text(value)),
+          Expanded(
+            child: Text(
+              value,
+              overflow: TextOverflow.ellipsis, // Potong teks jika terlalu panjang
+              maxLines: 2, // Maksimal 2 baris
+            ),
+          ),
         ],
       ),
     );
