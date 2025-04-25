@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'pages/BuildingDashboardPage.dart';
+import 'pages/login.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,13 +12,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Peminjaman Ruangan Kampus',
+      debugShowCheckedModeBanner: false,
+      title: 'N-Space',
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: Colors.grey[100],
       ),
-      home: const BuildingDashboardPage(),
-      debugShowCheckedModeBanner: false,
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const LoginPage(),
+        // Tambahkan rute lainnya di sini jika perlu
+      },
     );
   }
 }
