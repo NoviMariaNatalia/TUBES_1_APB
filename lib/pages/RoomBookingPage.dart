@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'room_list_page.dart';
+import '../widgets/custom_app_bar.dart';
 
 class RoomBookingPage extends StatefulWidget {
   final String selectedRoom;
 
   const RoomBookingPage({Key? key, required this.selectedRoom})
-    : super(key: key);
+      : super(key: key);
 
   @override
   _RoomBookingPageState createState() => _RoomBookingPageState();
@@ -100,33 +101,7 @@ class _RoomBookingPageState extends State<RoomBookingPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header yang seragam dengan halaman Daftar Ruangan
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    spreadRadius: 1,
-                    blurRadius: 2,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Image.asset('assets/images/logo.png', height: 40),
-                  const CircleAvatar(
-                    backgroundImage: AssetImage(
-                      'assets/images/foto-profil-mahasiswa.jpg',
-                    ),
-                    radius: 20,
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 20),
+            const CustomAppBar(),
 
             // Jadwal Ketersediaan Ruangan
             Text(
@@ -137,6 +112,10 @@ class _RoomBookingPageState extends State<RoomBookingPage> {
             _buildScheduleTable(),
 
             SizedBox(height: 20),
+            Text(
+              "Isi Form di Bawah Ini Untuk Mengajukan Peminjaman",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             Form(
               key: _formKey,
               child: Column(
@@ -152,7 +131,6 @@ class _RoomBookingPageState extends State<RoomBookingPage> {
                     "Nama Ruangan",
                     enabled: false,
                   ),
-
                   Row(
                     children: [
                       Expanded(
@@ -191,10 +169,8 @@ class _RoomBookingPageState extends State<RoomBookingPage> {
                       ),
                     ],
                   ),
-
                   _buildTextField(_orgController, "Nama Organisasi"),
                   _buildTextField(_purposeController, "Tujuan", maxLines: 3),
-
                   SizedBox(height: 20),
                   Row(
                     children: [
@@ -283,8 +259,8 @@ class _RoomBookingPageState extends State<RoomBookingPage> {
           labelText: label,
           border: OutlineInputBorder(),
         ),
-        validator:
-            (value) => (value == null || value.isEmpty) ? 'Wajib diisi' : null,
+        validator: (value) =>
+            (value == null || value.isEmpty) ? 'Wajib diisi' : null,
       ),
     );
   }
@@ -301,9 +277,8 @@ class _RoomBookingPageState extends State<RoomBookingPage> {
           controller: TextEditingController(
             text: date != null ? DateFormat('dd/MM/yyyy').format(date) : '',
           ),
-          validator:
-              (value) =>
-                  (value == null || value.isEmpty) ? 'Wajib diisi' : null,
+          validator: (value) =>
+              (value == null || value.isEmpty) ? 'Wajib diisi' : null,
         ),
       ),
     );
@@ -321,9 +296,8 @@ class _RoomBookingPageState extends State<RoomBookingPage> {
           controller: TextEditingController(
             text: time != null ? time.format(context) : '',
           ),
-          validator:
-              (value) =>
-                  (value == null || value.isEmpty) ? 'Wajib diisi' : null,
+          validator: (value) =>
+              (value == null || value.isEmpty) ? 'Wajib diisi' : null,
         ),
       ),
     );
