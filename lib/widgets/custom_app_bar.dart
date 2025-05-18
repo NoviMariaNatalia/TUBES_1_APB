@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../pages/profile_mahasiswa_page.dart'; // (halaman yang nanti kita buat)
 import '../pages/login.dart'; // pastikan halaman login kamu juga ada
+import '../pages/BuildingDashboardPage.dart';
+import '../pages/BookingHistoryPage.dart';
 
 class CustomAppBar extends StatelessWidget {
   const CustomAppBar({super.key});
@@ -8,7 +10,7 @@ class CustomAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -23,58 +25,136 @@ class CustomAppBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          // Logo
+          // Di dalam Container (Header bagian atas)
           GestureDetector(
             onTap: () {
-              Navigator.pushReplacementNamed(context, '/dashboard');
+              // Navigasi ke halaman Dashboard
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const BuildingDashboardPage(),
+                ),
+              );
             },
             child: Image.asset('assets/images/logo.png', height: 40),
           ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'profil') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ProfilMahasiswaPage(),
-                  ),
-                );
-              } else if (value == 'logout') {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const LoginPage(),
-                  ),
-                );
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem<String>(
-                value: 'profil',
-                child: ListTile(
-                  leading: Icon(Icons.person),
-                  title: Text('Profil Saya'),
+
+          // Foto profil dengan dropdown
+          Row(
+            children: [
+              PopupMenuButton(
+                offset: const Offset(0, 45),
+                icon: Row(
+                  children: [
+                    const CircleAvatar(
+                      radius: 18, // Lebih kecil
+                      backgroundImage: AssetImage(
+                        'assets/images/foto-profil-mahasiswa.jpg',
+                      ),
+                    ),
+                    // Icon dropdown sebagai indikator
+                    Icon(
+                      Icons.arrow_drop_down,
+                      color: Colors.blue[900],
+                      size: 20,
+                    ),
+                  ],
                 ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'logout',
-                child: ListTile(
-                  leading: Icon(Icons.logout),
-                  title: Text('Keluar'),
-                ),
+                itemBuilder: (context) => [
+                  // Info profil
+                  PopupMenuItem(
+                    enabled: false,
+                    height: 40, // Lebih pendek
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Jack Smith',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14, // Lebih kecil
+                            color: Colors.blue[900],
+                          ),
+                        ),
+                        Text(
+                          'Mahasiswa',
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const Divider(height: 10), // Lebih pendek
+                      ],
+                    ),
+                  ),
+
+                  // Menu Riwayat (baru)
+                  PopupMenuItem(
+                    height: 40, // Lebih pendek
+                    child: const Row(
+                      children: [
+                        Icon(Icons.history, size: 18),
+                        SizedBox(width: 10),
+                        Text('Riwayat Pengajuan'),
+                      ],
+                    ),
+                    onTap: () {
+                      print('Navigate to Riwayat');
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) => const BookingHistoryPage(),
+                      //   ),
+                      // );
+                    },
+                  ),
+
+                  // Menu Profil Saya
+                  PopupMenuItem(
+                    height: 40, // Lebih pendek
+                    child: const Row(
+                      children: [
+                        Icon(Icons.person_outline, size: 18),
+                        SizedBox(width: 10),
+                        Text('Profil Saya'),
+                      ],
+                    ),
+                    onTap: () {
+                      print('Navigate to Profil Saya');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ProfilMahasiswaPage(),
+                        ),
+                      );
+                    },
+                  ),
+
+                  // Menu Keluar
+                  PopupMenuItem(
+                    height: 40, // Lebih pendek
+                    child: const Row(
+                      children: [
+                        Icon(Icons.logout, size: 18),
+                        SizedBox(width: 10),
+                        Text('Keluar'),
+                      ],
+                    ),
+                    onTap: () {
+                      print('Navigate to Keluar');
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const LoginPage()
+                        ),
+                        (route) => false,
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
-            child: Row(
-              children: [
-                const Text('J. Smith', style: TextStyle(color: Colors.black)),
-                const SizedBox(width: 8),
-                const CircleAvatar(
-                  backgroundImage: AssetImage(
-                    'assets/images/foto-profil-mahasiswa.jpg',
-                  ),
-                  radius: 20,
-                ),
-              ],
-            ),
           ),
         ],
       ),

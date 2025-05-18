@@ -3,6 +3,7 @@ import 'BuildingDashboardPage.dart';
 import 'profile_mahasiswa_page.dart';
 import 'login.dart';
 import 'BookingFormPage.dart';
+import '../widgets/custom_app_bar.dart';
 
 class RoomListPage extends StatefulWidget {
   const RoomListPage({Key? key}) : super(key: key);
@@ -12,124 +13,16 @@ class RoomListPage extends StatefulWidget {
 }
 
 class _RoomListPageState extends State<RoomListPage> {
-  bool _showProfileMenu = false;
+  // bool _showProfileMenu = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // App bar untuk logo dan foto profil
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    spreadRadius: 1,
-                    blurRadius: 2,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Logo
-                  // Di dalam Container (Header bagian atas)
-                  GestureDetector(
-                    onTap: () {
-                      // Navigasi ke halaman Dashboard
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const BuildingDashboardPage(),
-                        ),
-                      );
-                    },
-                    child: Image.asset('assets/images/logo.png', height: 40),
-                  ),
-
-                  // Foto Profil
-                  PopupMenuButton(
-                    offset: const Offset(0, 50),
-                    icon: const CircleAvatar(
-                      radius: 20,
-                      backgroundImage: AssetImage(
-                        'assets/images/foto-profil-mahasiswa.jpg',
-                      ),
-                    ),
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        enabled: false,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Jack Smith',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.blue[900],
-                              ),
-                            ),
-                            const Text(
-                              'Mahasiswa',
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 12,
-                              ),
-                            ),
-                            const Divider(),
-                          ],
-                        ),
-                      ),
-                      PopupMenuItem(
-                        child: const Row(
-                          children: [
-                            Icon(Icons.person_outline, size: 20),
-                            SizedBox(width: 10),
-                            Text('Profil Saya'),
-                          ],
-                        ),
-                        onTap: () {
-                          print('Navigate to Profile');
-                          // Navigasi ke profil mahasiswa
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const ProfilMahasiswaPage()),
-                          );
-                        },
-                      ),
-                      PopupMenuItem(
-                        child: const Row(
-                          children: [
-                            Icon(Icons.logout, size: 20),
-                            SizedBox(width: 10),
-                            Text('Keluar'),
-                          ],
-                        ),
-                        onTap: () {
-                          print('Navigate to Login');
-                          // Navigasi ke login
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const LoginPage()),
-                            (route) => false,
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            // AppBar
+            const CustomAppBar(),
 
             // Judul Halaman
             Container(
@@ -150,7 +43,9 @@ class _RoomListPageState extends State<RoomListPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: GridView.count(
                   crossAxisCount: 2,
-                  childAspectRatio: 0.8,
+                  childAspectRatio: 0.6,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
                   children: [
                     _buildRoomCard('VIP A', 'vipA-gsg.png', 1, 50, [
                       'AC',
@@ -162,6 +57,10 @@ class _RoomListPageState extends State<RoomListPage> {
                     ]),
                     _buildRoomCard('VIP C', 'vipC-gsg.png', 3, 50, [
                       'AC',
+                      'Proyektor',
+                    ]),
+                    _buildRoomCard('AULA GSG', 'aula-gsg.png', 1, 50, [
+                      'Toilet',
                       'Proyektor',
                     ]),
                     _buildRoomCard(
@@ -178,10 +77,6 @@ class _RoomListPageState extends State<RoomListPage> {
                       50,
                       [],
                     ),
-                    _buildRoomCard('AULA GSG', 'aula-gsg.png', 1, 50, [
-                      'Toilet',
-                      'Proyektor',
-                    ]),
                   ],
                 ),
               ),
@@ -206,14 +101,20 @@ class _RoomListPageState extends State<RoomListPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
+          AspectRatio(
+            aspectRatio: 16/9,
             child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(10),
-                topRight: Radius.circular(10),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  topRight: Radius.circular(10),
+                ),
+              child: Image.asset(
+                  'assets/images/$image',
+                  fit: BoxFit.cover,
+                  // height: double.infinity,
+                  // width: double.infinity,
               ),
-              child: Image.asset('assets/images/$image', fit: BoxFit.cover),
-            ),
+            )
           ),
           Container(
             padding: const EdgeInsets.all(12),
@@ -228,6 +129,8 @@ class _RoomListPageState extends State<RoomListPage> {
                     color: Colors.black,
                   ),
                   textAlign: TextAlign.center,
+                  // maxLines: 1,
+                  // overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text('Lantai: $floor', style: const TextStyle(fontSize: 12)),
