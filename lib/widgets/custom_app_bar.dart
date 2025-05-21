@@ -101,12 +101,12 @@ class CustomAppBar extends StatelessWidget {
                     ),
                     onTap: () {
                       print('Navigate to Riwayat');
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     builder: (context) => const BookingHistoryPage(),
-                      //   ),
-                      // );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BookingHistoryPage(),
+                        ),
+                      );
                     },
                   ),
 

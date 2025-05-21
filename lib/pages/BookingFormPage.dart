@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'BookingHistoryPage.dart';
 import 'package:tubes1_apb/models/booking_model.dart';
+import 'package:tubes1_apb/services/booking_service.dart';
 import '../widgets/custom_app_bar.dart';
 
 class BookingFormPage extends StatefulWidget {
@@ -54,6 +55,45 @@ class _BookingFormPageState extends State<BookingFormPage> {
       _jamMulai = null;
       _jamSelesai = null;
     });
+  }
+
+  bool _validateForm() {
+    String errorMessage = "";
+
+    if (_namaPemesanController.text.isEmpty ||
+        _noHpController.text.isEmpty ||
+        _tujuanController.text.isEmpty ||
+        _namaOrganisasiController.text.isEmpty ||
+        _tanggalMulai == null ||
+        _tanggalSelesai == null ||
+        _jamMulai == null ||
+        _jamSelesai == null) {
+      errorMessage = "Semua field harus diisi.";
+    } else if (_tanggalMulai!.isAfter(_tanggalSelesai!)) {
+      errorMessage = "Tanggal mulai tidak boleh setelah tanggal selesai.";
+    } else if (_tanggalMulai!.isAtSameMomentAs(_tanggalSelesai!) &&
+        _jamMulai! >= _jamSelesai!) {
+      errorMessage = "Jam mulai harus sebelum jam selesai.";
+    }
+
+    if (errorMessage.isNotEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Validasi Gagal"),
+          content: Text(errorMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
+      return false;
+    }
+
+    return true;
   }
 
   void _submitForm() {
@@ -371,41 +411,70 @@ class _BookingFormPageState extends State<BookingFormPage> {
                                       style: TextStyle(color: Colors.white)),
                                 ),
                                 ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.pop(
-                                        context); // Tutup dialog konfirmasi
+                                  onPressed: () async {
+                                    if (_validateForm()) {
+                                      // Buat objek booking
+                                      Booking booking = Booking(
+                                        nama: _namaPemesanController.text,
+                                        noHp: _noHpController.text,
+                                        ruangan: widget.roomName,
+                                        tanggalMulai: DateFormat('dd/MM/yyyy').format(_tanggalMulai!),
+                                        tanggalSelesai: DateFormat('dd/MM/yyyy').format(_tanggalSelesai!),
+                                        jamMulai: "${_jamMulai!}:00",
+                                        jamSelesai: "${_jamSelesai!}:00",
+                                        tujuan: _tujuanController.text,
+                                        organisasi: _namaOrganisasiController.text,
+                                      );
 
-                                    // Buat objek booking
-                                    Booking booking = Booking(
-                                      nama: _namaPemesanController.text,
-                                      noHp: _noHpController.text,
-                                      ruangan: widget.roomName,
-                                      tanggalMulai: DateFormat('dd/MM/yyyy')
-                                          .format(_tanggalMulai!),
-                                      tanggalSelesai: DateFormat('dd/MM/yyyy')
-                                          .format(_tanggalSelesai!),
-                                      jamMulai: "${_jamMulai!}:00",
-                                      jamSelesai: "${_jamSelesai!}:00",
-                                      tujuan: _tujuanController.text,
-                                      organisasi:
-                                          _namaOrganisasiController.text,
-                                    );
+                                      try {
+                                        // Tampilkan indicator loading
+                                        showDialog(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          builder: (BuildContext context) {
+                                            return const Center(
+                                              child: CircularProgressIndicator(),
+                                            );
+                                          },
+                                        );
 
-                                    // Arahkan langsung ke BookingHistoryPage
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            BookingHistoryPage(
-                                                bookings: [booking]),
-                                      ),
-                                    );
+                                        // Simpan ke Firebase
+                                        BookingService bookingService = BookingService();
+                                        Booking savedBooking = await bookingService.saveBooking(booking);
+
+                                        // Tutup dialog loading
+                                        Navigator.pop(context);
+
+                                        // Tampilkan pesan sukses
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text("Booking berhasil disimpan")),
+                                        );
+
+                                        // Reset form
+                                        _resetForm();
+
+                                        // Navigasi ke halaman riwayat
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => BookingHistoryPage(),
+                                          ),
+                                        );
+                                      } catch (e) {
+                                        // Tutup dialog loading
+                                        Navigator.pop(context);
+
+                                        // Tampilkan pesan error
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text("Error: $e")),
+                                        );
+                                      }
+                                    }
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF1E3A8A),
                                   ),
-                                  child: const Text("Submit Form",
-                                      style: TextStyle(color: Colors.white)),
+                                  child: const Text("Submit Form", style: TextStyle(color: Colors.white)),
                                 ),
                               ],
                             )

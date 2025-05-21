@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "497529324252",
+    "project_id": "fir-booking-b015e",
+    "storage_bucket": "fir-booking-b015e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:497529324252:android:6d98e7eb6b68431a262a19",
+        "android_client_info": {
+          "package_name": "com.example.tubes1_apb"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3a-EI4c17IdPYpQvjo11LnHZpMt8f-rE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
