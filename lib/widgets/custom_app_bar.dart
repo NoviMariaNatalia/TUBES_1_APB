@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import '../pages/profile_mahasiswa_page.dart'; // (halaman yang nanti kita buat)
-import '../pages/login.dart'; // pastikan halaman login kamu juga ada
-import '../pages/BuildingDashboardPage.dart';
+import '../pages/login.dart';
+import '../pages/Dashboard.dart';
 import '../pages/BookingHistoryPage.dart';
 
 class CustomAppBar extends StatelessWidget {
@@ -33,7 +32,7 @@ class CustomAppBar extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const BuildingDashboardPage(),
+                  builder: (context) => const Dashboard(),
                 ),
               );
             },
@@ -105,27 +104,6 @@ class CustomAppBar extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) => BookingHistoryPage(),
-                        ),
-                      );
-                    },
-                  ),
-
-                  // Menu Profil Saya
-                  PopupMenuItem(
-                    height: 40, // Lebih pendek
-                    child: const Row(
-                      children: [
-                        Icon(Icons.person_outline, size: 18),
-                        SizedBox(width: 10),
-                        Text('Profil Saya'),
-                      ],
-                    ),
-                    onTap: () {
-                      print('Navigate to Profil Saya');
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ProfilMahasiswaPage(),
                         ),
                       );
                     },

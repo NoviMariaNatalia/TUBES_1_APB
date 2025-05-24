@@ -158,89 +158,89 @@ class _BookingFormPageState extends State<BookingFormPage> {
     );
   }
 
-  Widget _buildScheduleTable() {
-    final rooms = [
-      "VIP A",
-      "VIP B",
-      "VIP C",
-      "Lapangan Timur GSG",
-      "Lapangan Upacara GSG"
-    ];
-    final times = [
-      "08:00",
-      "09:00",
-      "10:00",
-      "11:00",
-      "12:00",
-      "13:00",
-      "14:00"
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Jadwal Ketersediaan Ruangan",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Table(
-            border: TableBorder.all(color: Colors.grey.shade300),
-            defaultColumnWidth: const IntrinsicColumnWidth(),
-            children: [
-              TableRow(
-                decoration: const BoxDecoration(color: Color(0xFF1E3A8A)),
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text("Tempat/Waktu",
-                        style: TextStyle(color: Colors.white)),
-                  ),
-                  ...times.map((t) => Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(t,
-                            style: const TextStyle(color: Colors.white)),
-                      )),
-                ],
-              ),
-              ...rooms.map((room) => TableRow(
-                    decoration: BoxDecoration(
-                        color: room == "VIP A"
-                            ? Colors.white
-                            : Colors.green.shade50),
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          room,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      ...times.map((t) {
-                        if (room == "VIP A" && t == "09:00") {
-                          return const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text("Booked",
-                                style: TextStyle(color: Colors.red)),
-                          );
-                        } else {
-                          return const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text("Available"),
-                          );
-                        }
-                      }),
-                    ],
-                  ))
-            ],
-          ),
-        ),
-        const SizedBox(height: 24),
-      ],
-    );
-  }
+  // Widget _buildScheduleTable() {
+  //   final rooms = [
+  //     "VIP A",
+  //     "VIP B",
+  //     "VIP C",
+  //     "Lapangan Timur GSG",
+  //     "Lapangan Upacara GSG"
+  //   ];
+  //   final times = [
+  //     "08:00",
+  //     "09:00",
+  //     "10:00",
+  //     "11:00",
+  //     "12:00",
+  //     "13:00",
+  //     "14:00"
+  //   ];
+  //
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       const Text(
+  //         "Jadwal Ketersediaan Ruangan",
+  //         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+  //       ),
+  //       const SizedBox(height: 12),
+  //       SingleChildScrollView(
+  //         scrollDirection: Axis.horizontal,
+  //         child: Table(
+  //           border: TableBorder.all(color: Colors.grey.shade300),
+  //           defaultColumnWidth: const IntrinsicColumnWidth(),
+  //           children: [
+  //             TableRow(
+  //               decoration: const BoxDecoration(color: Color(0xFF1E3A8A)),
+  //               children: [
+  //                 const Padding(
+  //                   padding: EdgeInsets.all(8.0),
+  //                   child: Text("Tempat/Waktu",
+  //                       style: TextStyle(color: Colors.white)),
+  //                 ),
+  //                 ...times.map((t) => Padding(
+  //                       padding: const EdgeInsets.all(8.0),
+  //                       child: Text(t,
+  //                           style: const TextStyle(color: Colors.white)),
+  //                     )),
+  //               ],
+  //             ),
+  //             ...rooms.map((room) => TableRow(
+  //                   decoration: BoxDecoration(
+  //                       color: room == "VIP A"
+  //                           ? Colors.white
+  //                           : Colors.green.shade50),
+  //                   children: [
+  //                     Padding(
+  //                       padding: const EdgeInsets.all(8.0),
+  //                       child: Text(
+  //                         room,
+  //                         style: const TextStyle(fontWeight: FontWeight.bold),
+  //                       ),
+  //                     ),
+  //                     ...times.map((t) {
+  //                       if (room == "VIP A" && t == "09:00") {
+  //                         return const Padding(
+  //                           padding: EdgeInsets.all(8.0),
+  //                           child: Text("Booked",
+  //                               style: TextStyle(color: Colors.red)),
+  //                         );
+  //                       } else {
+  //                         return const Padding(
+  //                           padding: EdgeInsets.all(8.0),
+  //                           child: Text("Available"),
+  //                         );
+  //                       }
+  //                     }),
+  //                   ],
+  //                 ))
+  //           ],
+  //         ),
+  //       ),
+  //       const SizedBox(height: 24),
+  //     ],
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -256,7 +256,7 @@ class _BookingFormPageState extends State<BookingFormPage> {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      _buildScheduleTable(),
+                      // _buildScheduleTable(),
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(

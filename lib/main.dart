@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:tubes1_apb/pages/Dashboard.dart';
 import 'firebase_options.dart';
-import 'pages/BuildingDashboardPage.dart';
+import 'pages/Dashboard.dart';
 import 'pages/login.dart';
-import 'pages/profile_mahasiswa_page.dart';
 
 void main() async {
 
@@ -30,8 +30,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const LoginPage(),
-        '/dashboard': (context) => const BuildingDashboardPage(),
-        '/profil-mahasiswa': (context) => const ProfilMahasiswaPage(),
+        '/dashboard': (context) => const Dashboard(),
         // Tambahkan rute lainnya di sini jika perlu
       },
     );
