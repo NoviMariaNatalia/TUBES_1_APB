@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/room_model.dart';
 import '../services/room_service.dart';
+import '../services/hybrid_booking_service.dart';
 import '../widgets/custom_app_bar.dart';
 import 'BookingFormPage.dart';
 
@@ -17,6 +18,7 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   final MapController _mapController = MapController();
   final RoomService _roomService = RoomService();
+  final HybridBookingService _hybridBookingService = HybridBookingService();
   final TextEditingController _searchController = TextEditingController();
 
   String _searchQuery = '';
@@ -51,6 +53,30 @@ class _DashboardState extends State<Dashboard> {
   };
 
   final LatLng mapCenter = LatLng(-6.9730, 107.6305);
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeSync();
+  }
+
+  Future<void> _initializeSync() async {
+    try {
+      print('🔄 Dashboard: Initializing hybrid sync...');
+
+      // Initialize hybrid booking service
+      await _hybridBookingService.initializeSync();
+      print('✅ Dashboard: Hybrid booking sync initialized');
+
+      // Force refresh room data from Firebase
+      await _roomService.forceRefresh();
+      print('✅ Dashboard: Room data refreshed');
+
+    } catch (e) {
+      print('❌ Dashboard: Sync failed - $e');
+      // Continue anyway, app will work with cached data
+    }
+  }
 
   void _focusToLocation(LatLng location) {
     _mapController.move(location, 19.0);
@@ -110,12 +136,13 @@ class _DashboardState extends State<Dashboard> {
                 tooltip: _showMap ? 'Sembunyikan Peta' : 'Tampilkan Peta',
               ),
               IconButton(
-                onPressed: () {
-                  // Refresh data
+                onPressed: () async {
+                  // Refresh data dengan sync
+                  await _initializeSync();
                   setState(() {});
                 },
                 icon: const Icon(Icons.refresh),
-                tooltip: 'Refresh',
+                tooltip: 'Refresh & Sync',
               ),
             ],
           ),
@@ -252,7 +279,7 @@ class _DashboardState extends State<Dashboard> {
     return StreamBuilder<List<Room>>(
       stream: _searchQuery.isEmpty
           ? _roomService.getAllRooms()
-          : _roomService.searchRooms(_searchQuery),
+          : Stream.fromFuture(_roomService.searchRooms(_searchQuery)),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -268,7 +295,10 @@ class _DashboardState extends State<Dashboard> {
                 Text('Error: ${snapshot.error}'),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => setState(() {}),
+                  onPressed: () async {
+                    await _initializeSync();
+                    setState(() {});
+                  },
                   child: const Text('Coba Lagi'),
                 ),
               ],
@@ -299,6 +329,16 @@ class _DashboardState extends State<Dashboard> {
                       });
                     },
                     child: const Text('Hapus Filter'),
+                  ),
+                ],
+                if (_searchQuery.isEmpty) ...[
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await _initializeSync();
+                      setState(() {});
+                    },
+                    child: const Text('Refresh Data'),
                   ),
                 ],
               ],

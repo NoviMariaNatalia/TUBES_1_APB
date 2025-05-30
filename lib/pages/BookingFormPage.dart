@@ -6,6 +6,7 @@ import 'package:tubes1_apb/models/booking_model.dart';
 import 'package:tubes1_apb/models/room_model.dart';
 import 'package:tubes1_apb/services/booking_service.dart';
 import 'package:tubes1_apb/services/room_service.dart';
+import 'package:tubes1_apb/services/hybrid_booking_service.dart';
 import '../widgets/custom_app_bar.dart';
 
 class BookingFormPage extends StatefulWidget {
@@ -23,6 +24,7 @@ class _BookingFormPageState extends State<BookingFormPage> {
   final TextEditingController _tujuanController = TextEditingController();
   final TextEditingController _namaOrganisasiController = TextEditingController();
   final RoomService _roomService = RoomService();
+  final HybridBookingService _hybridBookingService = HybridBookingService();
 
   DateTime? _tanggalMulai;
   DateTime? _tanggalSelesai;
@@ -34,13 +36,23 @@ class _BookingFormPageState extends State<BookingFormPage> {
   void initState() {
     super.initState();
     _checkRoomExists();
+    _initializeServices();
+  }
+
+  Future<void> _initializeServices() async {
+    // Initialize sync saat halaman dibuka
+    try {
+      await _hybridBookingService.initializeSync();
+      print('Hybrid booking service initialized');
+    } catch (e) {
+      print('Error initializing services: $e');
+    }
   }
 
   // Cek apakah ruangan masih ada di database
   Future<void> _checkRoomExists() async {
     try {
-      List<Room> rooms = await _roomService.getAllRooms().first;
-      bool roomExists = rooms.any((room) => room.name == widget.roomName);
+      bool roomExists = await _roomService.roomExists(widget.roomName);
 
       if (!roomExists) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -72,31 +84,28 @@ class _BookingFormPageState extends State<BookingFormPage> {
     );
   }
 
-  // Ambil data booking dari Firestore untuk tanggal tertentu
-  Stream<QuerySnapshot> _getBookingsForDate(DateTime date) {
-    String formattedDate = DateFormat('dd/MM/yyyy').format(date);
-    return FirebaseFirestore.instance
-        .collection('bookings')
-        .where('tanggalMulai', isEqualTo: formattedDate)
-        .snapshots();
+  // Ambil data booking dari hybrid service
+  Future<List<Map<String, dynamic>>> _getBookingsForDate(DateTime date) async {
+    return await _hybridBookingService.getBookingsForDate(date);
   }
 
   // Cek apakah ruangan dan jam tertentu sudah dibooking
-  bool _isRoomBooked(List<QueryDocumentSnapshot> bookings, String roomName, String time) {
+  bool _isRoomBooked(List<Map<String, dynamic>> bookings, String roomName, String time) {
     for (var booking in bookings) {
-      Map<String, dynamic> data = booking.data() as Map<String, dynamic>;
-      if (data['ruangan'] == roomName) {
-        String jamMulai = data['jamMulai'];
-        String jamSelesai = data['jamSelesai'];
+      if (booking['ruangan'] == roomName) {
+        String jamMulai = booking['jamMulai'] ?? booking['jam_mulai'] ?? '';
+        String jamSelesai = booking['jamSelesai'] ?? booking['jam_selesai'] ?? '';
 
-        // Parse jam mulai dan selesai
-        int startHour = int.parse(jamMulai.split(':')[0]);
-        int endHour = int.parse(jamSelesai.split(':')[0]);
-        int currentHour = int.parse(time.split(':')[0]);
+        if (jamMulai.isNotEmpty && jamSelesai.isNotEmpty) {
+          // Parse jam mulai dan selesai
+          int startHour = int.parse(jamMulai.split(':')[0]);
+          int endHour = int.parse(jamSelesai.split(':')[0]);
+          int currentHour = int.parse(time.split(':')[0]);
 
-        // Cek apakah jam saat ini berada dalam rentang booking
-        if (currentHour >= startHour && currentHour < endHour) {
-          return true;
+          // Cek apakah jam saat ini berada dalam rentang booking
+          if (currentHour >= startHour && currentHour < endHour) {
+            return true;
+          }
         }
       }
     }
@@ -106,44 +115,32 @@ class _BookingFormPageState extends State<BookingFormPage> {
   // Validasi konflik booking sebelum submit
   Future<bool> _checkBookingConflict() async {
     try {
-      String formattedDate = DateFormat('dd/MM/yyyy').format(_tanggalMulai!);
+      bool hasConflict = await _hybridBookingService.hasBookingConflict(
+        roomName: widget.roomName,
+        startDate: _tanggalMulai!,
+        startHour: _jamMulai!,
+        endHour: _jamSelesai!,
+      );
 
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('bookings')
-          .where('ruangan', isEqualTo: widget.roomName)
-          .where('tanggalMulai', isEqualTo: formattedDate)
-          .get();
-
-      for (var doc in snapshot.docs) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-
-        int existingStartHour = int.parse(data['jamMulai'].split(':')[0]);
-        int existingEndHour = int.parse(data['jamSelesai'].split(':')[0]);
-
-        // Cek overlap jam
-        if (_jamMulai! < existingEndHour && _jamSelesai! > existingStartHour) {
-          _showConflictDialog(data);
-          return false;
-        }
+      if (hasConflict) {
+        _showConflictDialog();
+        return false;
       }
 
       return true;
     } catch (e) {
       print('Error checking booking conflict: $e');
-      return false;
+      return true; // Allow booking if check fails
     }
   }
 
-  void _showConflictDialog(Map<String, dynamic> conflictData) {
+  void _showConflictDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Jadwal Bentrok"),
-        content: Text(
-            "Waktu yang dipilih bertentangan dengan booking:\n\n"
-                "Nama: ${conflictData['nama']}\n"
-                "Organisasi: ${conflictData['organisasi']}\n"
-                "Jam: ${conflictData['jamMulai']} - ${conflictData['jamSelesai']}\n\n"
+        content: const Text(
+            "Waktu yang dipilih bertentangan dengan booking yang sudah ada. "
                 "Silakan pilih waktu lain."
         ),
         actions: [
@@ -230,15 +227,16 @@ class _BookingFormPageState extends State<BookingFormPage> {
             // Ambil nama ruangan dari data RoomService
             List<String> roomNames = roomSnapshot.data!
                 .map((room) => room.name)
+                .cast<String>()
                 .toList();
 
-            return StreamBuilder<QuerySnapshot>(
-              stream: _getBookingsForDate(_selectedDate),
+            return FutureBuilder<List<Map<String, dynamic>>>(
+              future: _getBookingsForDate(_selectedDate),
               builder: (context, bookingSnapshot) {
-                List<QueryDocumentSnapshot> bookings = [];
+                List<Map<String, dynamic>> bookings = [];
 
                 if (bookingSnapshot.hasData) {
-                  bookings = bookingSnapshot.data!.docs;
+                  bookings = bookingSnapshot.data!;
                 }
 
                 return SingleChildScrollView(
@@ -654,9 +652,8 @@ class _BookingFormPageState extends State<BookingFormPage> {
                                           },
                                         );
 
-                                        // Simpan ke Firebase
-                                        BookingService bookingService = BookingService();
-                                        Booking savedBooking = await bookingService.saveBooking(booking);
+                                        // Simpan menggunakan Hybrid Service
+                                        await _hybridBookingService.saveBooking(booking);
 
                                         // Tutup dialog loading
                                         Navigator.pop(context);
@@ -664,13 +661,18 @@ class _BookingFormPageState extends State<BookingFormPage> {
                                         // Tampilkan pesan sukses
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           const SnackBar(
-                                            content: Text("Booking berhasil disimpan! Tabel jadwal akan diperbarui otomatis."),
+                                            content: Text("Booking berhasil disimpan! (Offline/Online)"),
                                             backgroundColor: Colors.green,
                                           ),
                                         );
 
                                         // Reset form
                                         _resetForm();
+
+                                        // Refresh tabel jadwal
+                                        setState(() {
+                                          _selectedDate = _selectedDate;
+                                        });
 
                                         // Navigasi ke halaman riwayat
                                         Navigator.push(

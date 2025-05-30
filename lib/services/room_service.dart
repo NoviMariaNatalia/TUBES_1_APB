@@ -1,134 +1,131 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/room_model.dart';
+import 'database_helper.dart';
 
 class RoomService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final DatabaseHelper _dbHelper = DatabaseHelper();
   final String _collection = 'rooms';
 
-  /// Stream untuk mendapatkan semua ruangan secara real-time (tanpa orderBy)
-  Stream<List<Room>> getAllRooms() {
-    return _firestore
-        .collection(_collection)
-        .snapshots()
-        .map((snapshot) {
-      List<Room> rooms = snapshot.docs.map((doc) {
-        try {
-          return Room.fromFirestore(doc.data(), doc.id);
-        } catch (e) {
-          print('Error parsing room ${doc.id}: $e');
-          return null;
-        }
-      }).where((room) => room != null).cast<Room>().toList();
-
-      // Sort di client side
-      rooms.sort((a, b) {
-        int buildingCompare = a.building.compareTo(b.building);
-        if (buildingCompare != 0) return buildingCompare;
-        return a.name.compareTo(b.name);
-      });
-
-      return rooms;
-    });
-  }
-
-  /// Get rooms berdasarkan building name
-  Stream<List<Room>> getRoomsByBuilding(String building) {
-    return _firestore
-        .collection(_collection)
-        .where('building', isEqualTo: building)
-        .snapshots()
-        .map((snapshot) {
-      List<Room> rooms = snapshot.docs.map((doc) {
-        try {
-          return Room.fromFirestore(doc.data(), doc.id);
-        } catch (e) {
-          print('Error parsing room ${doc.id}: $e');
-          return null;
-        }
-      }).where((room) => room != null).cast<Room>().toList();
-
-      // Sort by name
-      rooms.sort((a, b) => a.name.compareTo(b.name));
-      return rooms;
-    });
-  }
-
-  /// Get single room by ID
-  Future<Room?> getRoomById(String roomId) async {
+  /// Hybrid method: SQLite first, then Firebase
+  Stream<List<Room>> getAllRooms() async* {
     try {
-      DocumentSnapshot doc = await _firestore
-          .collection(_collection)
-          .doc(roomId)
-          .get();
-
-      if (doc.exists && doc.data() != null) {
-        return Room.fromFirestore(doc.data() as Map<String, dynamic>, doc.id);
+      // 1. Emit data dari SQLite dulu (untuk UI cepat)
+      List<Room> localRooms = await _getLocalRooms();
+      if (localRooms.isNotEmpty) {
+        print('Loading rooms from SQLite cache: ${localRooms.length} rooms');
+        yield localRooms;
       }
-      return null;
+
+      // 2. Sync dengan Firebase dan update cache
+      await _syncRoomsFromFirebase();
+
+      // 3. Emit data terbaru dari SQLite
+      List<Room> updatedRooms = await _getLocalRooms();
+      yield updatedRooms;
+
     } catch (e) {
-      print('Error getting room $roomId: $e');
-      return null;
+      print('Error in getAllRooms: $e');
+      // Fallback ke data lokal jika ada error
+      List<Room> fallbackRooms = await _getLocalRooms();
+      yield fallbackRooms;
     }
   }
 
-  /// Get unique building names
-  Future<List<String>> getBuildingNames() async {
+  /// Get rooms dari SQLite
+  Future<List<Room>> _getLocalRooms() async {
     try {
-      QuerySnapshot snapshot = await _firestore
-          .collection(_collection)
-          .get();
+      final roomsData = await _dbHelper.getAllRooms();
 
-      Set<String> buildingNames = {};
-      for (var doc in snapshot.docs) {
-        final data = doc.data() as Map<String, dynamic>;
-        final building = data['building'] as String?;
-        if (building != null && building.isNotEmpty) {
-          buildingNames.add(building);
-        }
-      }
-
-      List<String> sortedBuildings = buildingNames.toList();
-      sortedBuildings.sort();
-      return sortedBuildings;
+      return roomsData.map((data) {
+        return Room(
+          id: data['id'],
+          name: data['name'],
+          building: data['building'],
+          floor: data['floor'],
+          capacity: data['capacity'],
+          facilities: (data['facilities'] as String).split(','),
+          photoUrl: data['photo_url'] ?? '',
+          createdAt: DateTime.parse(data['created_at']),
+          updatedAt: DateTime.parse(data['updated_at']),
+        );
+      }).toList();
     } catch (e) {
-      print('Error getting building names: $e');
+      print('Error getting local rooms: $e');
       return [];
     }
   }
 
-  /// Search rooms by name or building
-  Stream<List<Room>> searchRooms(String query) {
-    if (query.isEmpty) {
-      return getAllRooms();
-    }
+  /// Sync rooms dari Firebase ke SQLite
+  Future<void> _syncRoomsFromFirebase() async {
+    try {
+      print('Syncing rooms from Firebase...');
 
-    // Get all rooms and filter on client side
-    return getAllRooms().map((rooms) {
-      return rooms.where((room) {
+      QuerySnapshot snapshot = await _firestore.collection(_collection).get();
+
+      List<Map<String, dynamic>> firebaseRooms = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return {
+          'id': doc.id,
+          'name': data['name'] ?? '',
+          'building': data['building'] ?? '',
+          'floor': data['floor'] ?? 0,
+          'capacity': data['capacity'] ?? 0,
+          'facilities': (data['facilities'] as List?)?.join(',') ?? '',
+          'photo_url': data['photo_url'] ?? '',
+        };
+      }).toList();
+
+      // Update cache di SQLite
+      await _dbHelper.updateRoomCache(firebaseRooms);
+
+      print('Firebase sync completed: ${firebaseRooms.length} rooms');
+
+    } catch (e) {
+      print('Error syncing from Firebase: $e');
+      // Jika error, tetap gunakan cache lokal
+    }
+  }
+
+  /// Search rooms (dari SQLite untuk performa)
+  Future<List<Room>> searchRooms(String query) async {
+    try {
+      final allRooms = await _getLocalRooms();
+
+      if (query.isEmpty) return allRooms;
+
+      return allRooms.where((room) {
         return room.name.toLowerCase().contains(query.toLowerCase()) ||
             room.building.toLowerCase().contains(query.toLowerCase());
       }).toList();
-    });
+    } catch (e) {
+      print('Error searching rooms: $e');
+      return [];
+    }
+  }
+
+  /// Check if room exists (untuk validasi)
+  Future<bool> roomExists(String roomName) async {
+    try {
+      final rooms = await _getLocalRooms();
+      return rooms.any((room) => room.name == roomName);
+    } catch (e) {
+      print('Error checking room existence: $e');
+      return false;
+    }
   }
 
   /// Get room statistics
   Future<Map<String, dynamic>> getRoomStatistics() async {
     try {
-      QuerySnapshot snapshot = await _firestore
-          .collection(_collection)
-          .get();
+      final rooms = await _getLocalRooms();
 
-      int totalRooms = snapshot.docs.length;
-      int totalCapacity = 0;
+      int totalRooms = rooms.length;
+      int totalCapacity = rooms.fold(0, (sum, room) => sum + room.capacity);
+
       Map<String, int> buildingCount = {};
-
-      for (var doc in snapshot.docs) {
-        final data = doc.data() as Map<String, dynamic>;
-        final capacity = data['capacity'] as int? ?? 0;
-        final building = data['building'] as String? ?? '';
-
-        totalCapacity += capacity;
-        buildingCount[building] = (buildingCount[building] ?? 0) + 1;
+      for (var room in rooms) {
+        buildingCount[room.building] = (buildingCount[room.building] ?? 0) + 1;
       }
 
       return {
@@ -146,5 +143,10 @@ class RoomService {
         'building_count': 0,
       };
     }
+  }
+
+  /// Force refresh dari Firebase
+  Future<void> forceRefresh() async {
+    await _syncRoomsFromFirebase();
   }
 }
