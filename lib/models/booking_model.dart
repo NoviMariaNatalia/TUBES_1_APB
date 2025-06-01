@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Booking {
   final String id;
+  final String userId; // NEW: ID user yang membuat booking
   final String nama;
   final String noHp;
   final String ruangan;
@@ -15,6 +16,7 @@ class Booking {
 
   Booking({
     this.id = '', // Default kosong, akan diisi dengan ID dokumen Firebase
+    required this.userId, // NEW: Required user ID
     required this.nama,
     required this.noHp,
     required this.ruangan,
@@ -30,6 +32,7 @@ class Booking {
   // Metode untuk mengubah Booking menjadi Map (untuk dikirim ke Firestore)
   Map<String, dynamic> toMap() {
     return {
+      'userId': userId, // NEW: Include user ID
       'nama': nama,
       'noHp': noHp,
       'ruangan': ruangan,
@@ -48,6 +51,7 @@ class Booking {
   factory Booking.fromMap(Map<String, dynamic> map, String documentId) {
     return Booking(
       id: documentId,
+      userId: map['userId'] ?? '', // NEW: Get user ID from map
       nama: map['nama'] ?? '',
       noHp: map['noHp'] ?? '',
       ruangan: map['ruangan'] ?? '',
@@ -60,5 +64,4 @@ class Booking {
       status: map['status'] ?? 'pending',
     );
   }
-
 }

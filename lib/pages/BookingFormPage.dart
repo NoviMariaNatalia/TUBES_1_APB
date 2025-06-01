@@ -7,6 +7,7 @@ import 'package:tubes1_apb/models/room_model.dart';
 import 'package:tubes1_apb/services/booking_service.dart';
 import 'package:tubes1_apb/services/room_service.dart';
 import 'package:tubes1_apb/services/hybrid_booking_service.dart';
+import 'package:tubes1_apb/services/auth_service.dart';
 import '../widgets/custom_app_bar.dart';
 
 class BookingFormPage extends StatefulWidget {
@@ -25,6 +26,7 @@ class _BookingFormPageState extends State<BookingFormPage> {
   final TextEditingController _namaOrganisasiController = TextEditingController();
   final RoomService _roomService = RoomService();
   final HybridBookingService _hybridBookingService = HybridBookingService();
+  final AuthService _authService = AuthService(); // TAMBAHAN AUTH SERVICE
 
   DateTime? _tanggalMulai;
   DateTime? _tanggalSelesai;
@@ -35,8 +37,62 @@ class _BookingFormPageState extends State<BookingFormPage> {
   @override
   void initState() {
     super.initState();
-    _checkRoomExists();
-    _initializeServices();
+    _initializePage(); // Gabungkan semua initialization
+  }
+
+  // Method baru untuk initialize semua dengan proper sequencing
+  Future<void> _initializePage() async {
+    try {
+      // 1. Pastikan user session ter-restore dulu
+      await _authService.isLoggedIn();
+
+      // 2. Cek login setelah session di-restore
+      if (_authService.currentUser == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _showLoginRequiredDialog();
+        });
+        return; // Stop execution jika belum login
+      }
+
+      // 3. Lanjut dengan initialization lainnya jika sudah login
+      _checkRoomExists();
+      _initializeServices();
+
+      print('✅ User logged in: ${_authService.currentUser!.name}');
+
+    } catch (e) {
+      print('❌ Error initializing page: $e');
+    }
+  }
+
+  // TAMBAHAN METHOD CEK LOGIN
+  // void _checkUserLogin() {
+  //   if (_authService.currentUser == null) {
+  //     WidgetsBinding.instance.addPostFrameCallback((_) {
+  //       _showLoginRequiredDialog();
+  //     });
+  //   }
+  // }
+
+  // TAMBAHAN DIALOG LOGIN REQUIRED
+  void _showLoginRequiredDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text("Login Diperlukan"),
+        content: const Text("Anda harus login terlebih dahulu untuk membuat booking."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Tutup dialog
+              Navigator.pop(context); // Kembali ke halaman sebelumnya
+            },
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _initializeServices() async {
@@ -622,13 +678,25 @@ class _BookingFormPageState extends State<BookingFormPage> {
                                 ),
                                 ElevatedButton(
                                   onPressed: () async {
+                                    // MODIFIKASI: Cek user sudah login atau belum
+                                    if (_authService.currentUser == null) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Anda harus login terlebih dahulu'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                      return;
+                                    }
+
                                     if (_validateForm()) {
                                       // Cek konflik booking
                                       bool noConflict = await _checkBookingConflict();
                                       if (!noConflict) return;
 
-                                      // Buat objek booking
+                                      // MODIFIKASI: Buat objek booking dengan userId
                                       Booking booking = Booking(
+                                        userId: _authService.currentUser!.id, // TAMBAHAN userId
                                         nama: _namaPemesanController.text,
                                         noHp: _noHpController.text,
                                         ruangan: widget.roomName,

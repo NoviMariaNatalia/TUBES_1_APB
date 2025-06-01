@@ -2,9 +2,42 @@ import 'package:flutter/material.dart';
 import '../pages/login.dart';
 import '../pages/Dashboard.dart';
 import '../pages/BookingHistoryPage.dart';
+import '../services/auth_service.dart';
 
-class CustomAppBar extends StatelessWidget {
+class CustomAppBar extends StatefulWidget {
   const CustomAppBar({super.key});
+
+  @override
+  State<CustomAppBar> createState() => _CustomAppBarState();
+}
+
+class _CustomAppBarState extends State<CustomAppBar> {
+  final AuthService _authService = AuthService();
+  String userName = 'User'; // Default value
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  // Load nama user dari AuthService
+  void _loadUserName() {
+    if (_authService.currentUser != null) {
+      setState(() {
+        userName = _authService.currentUser!.name;
+      });
+    } else {
+      // Jika currentUser null, coba reload dari SharedPreferences
+      _authService.isLoggedIn().then((isLoggedIn) {
+        if (isLoggedIn && _authService.currentUser != null) {
+          setState(() {
+            userName = _authService.currentUser!.name;
+          });
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +58,6 @@ class CustomAppBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Logo
-          // Di dalam Container (Header bagian atas)
           GestureDetector(
             onTap: () {
               // Navigasi ke halaman Dashboard
@@ -46,10 +78,12 @@ class CustomAppBar extends StatelessWidget {
                 offset: const Offset(0, 45),
                 icon: Row(
                   children: [
-                    const CircleAvatar(
-                      radius: 18, // Lebih kecil
-                      backgroundImage: AssetImage(
-                        'assets/images/foto-profil-mahasiswa.jpg',
+                    Text(
+                      userName, // Gunakan userName dari state
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Colors.blue[900],
                       ),
                     ),
                     // Icon dropdown sebagai indikator
@@ -64,18 +98,10 @@ class CustomAppBar extends StatelessWidget {
                   // Info profil
                   PopupMenuItem(
                     enabled: false,
-                    height: 40, // Lebih pendek
+                    height: 40,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Jack Smith',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14, // Lebih kecil
-                            color: Colors.blue[900],
-                          ),
-                        ),
                         Text(
                           'Mahasiswa',
                           style: const TextStyle(
@@ -83,14 +109,14 @@ class CustomAppBar extends StatelessWidget {
                             fontSize: 12,
                           ),
                         ),
-                        const Divider(height: 10), // Lebih pendek
+                        const Divider(height: 10),
                       ],
                     ),
                   ),
 
-                  // Menu Riwayat (baru)
+                  // Menu Riwayat
                   PopupMenuItem(
-                    height: 40, // Lebih pendek
+                    height: 40,
                     child: const Row(
                       children: [
                         Icon(Icons.history, size: 18),
@@ -111,7 +137,7 @@ class CustomAppBar extends StatelessWidget {
 
                   // Menu Keluar
                   PopupMenuItem(
-                    height: 40, // Lebih pendek
+                    height: 40,
                     child: const Row(
                       children: [
                         Icon(Icons.logout, size: 18),
@@ -119,15 +145,21 @@ class CustomAppBar extends StatelessWidget {
                         Text('Keluar'),
                       ],
                     ),
-                    onTap: () {
+                    onTap: () async {
                       print('Navigate to Keluar');
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const LoginPage()
-                        ),
-                        (route) => false,
-                      );
+                      // Logout user
+                      await _authService.logout();
+
+                      // Navigate to login page
+                      if (context.mounted) {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const LoginPage()
+                          ),
+                              (route) => false,
+                        );
+                      }
                     },
                   ),
                 ],

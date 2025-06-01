@@ -22,8 +22,9 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2, // NAIKAN VERSION untuk trigger migration
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade, // TAMBAHAN migration handler
     );
   }
 
@@ -44,10 +45,11 @@ class DatabaseHelper {
       )
     ''');
 
-    // Tabel untuk booking (lokal dan yang belum sync)
+    // Tabel untuk booking (UPDATED dengan user_id column)
     await db.execute('''
       CREATE TABLE bookings(
         id TEXT PRIMARY KEY,
+        user_id TEXT, 
         nama TEXT NOT NULL,
         no_hp TEXT NOT NULL,
         ruangan TEXT NOT NULL,
@@ -64,6 +66,21 @@ class DatabaseHelper {
     ''');
 
     print('SQLite tables created successfully');
+  }
+
+  // TAMBAHAN: Migration handler untuk update schema
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    print('Upgrading database from version $oldVersion to $newVersion');
+
+    if (oldVersion < 2) {
+      // Add user_id column to existing bookings table
+      try {
+        await db.execute('ALTER TABLE bookings ADD COLUMN user_id TEXT');
+        print('✅ Added user_id column to bookings table');
+      } catch (e) {
+        print('⚠️ user_id column might already exist: $e');
+      }
+    }
   }
 
   // Simpan ruangan ke SQLite (untuk cache)
@@ -91,14 +108,26 @@ class DatabaseHelper {
       bookingData['id'] = 'local_${DateTime.now().millisecondsSinceEpoch}';
     }
 
-    await db.insert(
-      'bookings',
-      bookingData,
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    // VALIDASI: Pastikan user_id ada (fallback jika null)
+    if (bookingData['user_id'] == null) {
+      bookingData['user_id'] = 'unknown_user';
+      print('⚠️ user_id is null, using fallback value');
+    }
 
-    print('Booking saved to SQLite: ${bookingData['id']}');
-    return bookingData['id'];
+    try {
+      await db.insert(
+        'bookings',
+        bookingData,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      print('✅ Booking saved to SQLite: ${bookingData['id']}');
+      print('👤 User ID: ${bookingData['user_id']}');
+      return bookingData['id'];
+    } catch (e) {
+      print('❌ Error saving booking to SQLite: $e');
+      rethrow;
+    }
   }
 
   // Ambil booking untuk tanggal tertentu
@@ -163,5 +192,50 @@ class DatabaseHelper {
     }
 
     print('Room cache updated: ${rooms.length} rooms');
+  }
+
+  // TAMBAHAN: Debug method untuk check schema
+  Future<void> debugTableSchema() async {
+    final db = await database;
+
+    try {
+      // Check bookings table schema
+      List<Map<String, dynamic>> schema = await db.rawQuery('PRAGMA table_info(bookings)');
+      print('\n📋 BOOKINGS TABLE SCHEMA:');
+      for (var column in schema) {
+        print('   ${column['name']} (${column['type']})');
+      }
+
+      // Check if user_id column exists
+      bool hasUserId = schema.any((column) => column['name'] == 'user_id');
+      print('📍 user_id column exists: ${hasUserId ? "✅ YES" : "❌ NO"}');
+
+    } catch (e) {
+      print('❌ Error checking table schema: $e');
+    }
+  }
+
+  // TAMBAHAN: Reset database (jika migration gagal)
+  Future<void> resetDatabase() async {
+    try {
+      String path = join(await getDatabasesPath(), 'room_booking.db');
+
+      // Close current database
+      if (_database != null) {
+        await _database!.close();
+        _database = null;
+      }
+
+      // Delete database file
+      await deleteDatabase(path);
+      print('🗑️ Database deleted successfully');
+
+      // Recreate database
+      _database = await _initDatabase();
+      print('🆕 Database recreated successfully');
+
+    } catch (e) {
+      print('❌ Error resetting database: $e');
+    }
   }
 }

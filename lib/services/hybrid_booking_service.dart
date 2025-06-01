@@ -2,9 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../models/booking_model.dart';
 import 'database_helper.dart';
+import '../services/auth_service.dart';
 import 'dart:async';
 
 class HybridBookingService {
+  final AuthService _authService = AuthService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final DatabaseHelper _dbHelper = DatabaseHelper();
 
@@ -25,6 +27,7 @@ class HybridBookingService {
   /// Save booking ke SQLite
   Future<String> _saveToSQLite(Booking booking) async {
     Map<String, dynamic> bookingData = {
+      'user_id': booking.userId, // TAMBAHAN user_id
       'nama': booking.nama,
       'no_hp': booking.noHp,
       'ruangan': booking.ruangan,
@@ -67,6 +70,7 @@ class HybridBookingService {
   /// Sync booking ke Firebase dengan timeout
   Future<String> _syncToFirebase(Booking booking, String localId) async {
     DocumentReference docRef = await _firestore.collection('bookings').add({
+      'userId': booking.userId, // TAMBAHAN userId untuk Firebase
       'nama': booking.nama,
       'noHp': booking.noHp,
       'ruangan': booking.ruangan,
@@ -131,21 +135,27 @@ class HybridBookingService {
 
       for (var bookingData in unsyncedBookings) {
         try {
-          // Create Booking object
+          // MODIFIKASI: Get current user ID, atau gunakan yang tersimpan di local data
+          String userId = bookingData['user_id'] ??
+              _authService.currentUser?.id ??
+              'legacy_user'; // fallback untuk data lama
+
+          // Create Booking object dengan userId
           Booking booking = Booking(
-            nama: bookingData['nama'],
-            noHp: bookingData['no_hp'],
-            ruangan: bookingData['ruangan'],
-            tanggalMulai: bookingData['tanggal_mulai'],
-            tanggalSelesai: bookingData['tanggal_selesai'],
-            jamMulai: bookingData['jam_mulai'],
-            jamSelesai: bookingData['jam_selesai'],
-            tujuan: bookingData['tujuan'],
-            organisasi: bookingData['organisasi'],
+            userId: userId, // TAMBAHAN userId
+            nama: bookingData['nama'] ?? '',
+            noHp: bookingData['no_hp'] ?? '',
+            ruangan: bookingData['ruangan'] ?? '',
+            tanggalMulai: bookingData['tanggal_mulai'] ?? '',
+            tanggalSelesai: bookingData['tanggal_selesai'] ?? '',
+            jamMulai: bookingData['jam_mulai'] ?? '',
+            jamSelesai: bookingData['jam_selesai'] ?? '',
+            tujuan: bookingData['tujuan'] ?? '',
+            organisasi: bookingData['organisasi'] ?? '',
           );
 
           // Sync to Firebase with timeout
-          String firebaseId = await _syncToFirebase(booking, bookingData['id'])
+          String firebaseId = await _syncToFirebase(booking, bookingData['id'].toString())
               .timeout(const Duration(seconds: 10));
 
           print('✅ Synced booking ${bookingData['id']} -> $firebaseId');
@@ -225,7 +235,9 @@ class HybridBookingService {
       } else {
         for (var booking in bookings) {
           String status = booking['is_synced'] == 1 ? "✅ Synced" : "⏳ Pending sync";
+          String userId = booking['user_id']?.toString() ?? 'No User ID';
           print('   • ${booking['nama']} → ${booking['ruangan']}');
+          print('     👤 User: $userId');
           print('     📅 ${booking['tanggal_mulai']} | ⏰ ${booking['jam_mulai']}-${booking['jam_selesai']}');
           print('     🔄 $status');
         }

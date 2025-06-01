@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
+import '../models/user_model.dart';
 import 'Dashboard.dart';
 
 class LoginPage extends StatefulWidget {
@@ -11,38 +13,84 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
+
   bool _rememberMe = false;
   bool _obscurePassword = true;
+  bool _isLoading = false;
   String? _errorMessage;
 
-  // Hardcoded credentials
-  final String _validUsername = 'mahasiswa';
-  final String _validPassword = 'mahasiswa123';
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginState();
+  }
 
-  void _handleLogin() {
-    final username = _usernameController.text.trim();
-    final password = _passwordController.text;
-
-    // Simple hardcoded validation
-    if (username == _validUsername && password == _validPassword) {
-      // Login berhasil, navigate ke Dashboard
+  // Check if user is already logged in
+  void _checkLoginState() async {
+    bool isLoggedIn = await _authService.isLoggedIn();
+    if (isLoggedIn && mounted) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const Dashboard()),
       );
-    } else {
-      // Login gagal, show error
-      setState(() {
-        _errorMessage = 'Username atau password salah!';
-      });
     }
   }
 
-  // Quick login untuk demo
+  void _handleLogin() async {
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text;
+
+    if (username.isEmpty || password.isEmpty) {
+      setState(() {
+        _errorMessage = 'Username dan password harus diisi!';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      User? user = await _authService.login(username, password);
+
+      if (user != null) {
+        // Login berhasil, navigate ke Dashboard
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const Dashboard()),
+          );
+        }
+      } else {
+        // Login gagal
+        setState(() {
+          _errorMessage = 'Username atau password salah!';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Terjadi kesalahan saat login. Coba lagi.';
+      });
+      print('Login error: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  // Quick login untuk demo (opsional - bisa dihapus jika tidak diperlukan)
   void _quickLogin() {
-    _usernameController.text = _validUsername;
-    _passwordController.text = _validPassword;
-    _rememberMe = true;
+    _usernameController.text = 'JackS';
+    _passwordController.text = 'JustSmith';
+    setState(() {
+      _rememberMe = true;
+    });
 
     // Auto login setelah 1 detik
     Future.delayed(const Duration(seconds: 1), () {
@@ -84,41 +132,6 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 32),
 
-                // Demo Credentials Info
-                // Container(
-                //   padding: const EdgeInsets.all(12),
-                //   decoration: BoxDecoration(
-                //     color: Colors.blue[50],
-                //     borderRadius: BorderRadius.circular(8),
-                //     border: Border.all(color: Colors.blue[200]!),
-                //   ),
-                //   child: const Column(
-                //     children: [
-                //       Row(
-                //         mainAxisAlignment: MainAxisAlignment.center,
-                //         children: [
-                //           Icon(Icons.info, color: Colors.blue, size: 20),
-                //           SizedBox(width: 8),
-                //           Text(
-                //             'Demo Login Mahasiswa',
-                //             style: TextStyle(
-                //               fontWeight: FontWeight.bold,
-                //               color: Colors.blue,
-                //             ),
-                //           ),
-                //         ],
-                //       ),
-                //       SizedBox(height: 4),
-                //       Text(
-                //         'Username: mahasiswa\nPassword: mahasiswa123',
-                //         style: TextStyle(fontSize: 12, color: Colors.blue),
-                //         textAlign: TextAlign.center,
-                //       ),
-                //     ],
-                //   ),
-                // ),
-                // const SizedBox(height: 16),
-
                 // Login Form
                 Container(
                   padding: const EdgeInsets.all(24),
@@ -136,7 +149,6 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
                       const Text(
                         'Masukkan username & password untuk login',
                         style: TextStyle(
@@ -159,9 +171,11 @@ class _LoginPageState extends State<LoginPage> {
                             children: [
                               const Icon(Icons.error, color: Colors.red, size: 20),
                               const SizedBox(width: 8),
-                              Text(
-                                _errorMessage!,
-                                style: const TextStyle(color: Colors.red),
+                              Expanded(
+                                child: Text(
+                                  _errorMessage!,
+                                  style: const TextStyle(color: Colors.red),
+                                ),
                               ),
                             ],
                           ),
@@ -172,6 +186,7 @@ class _LoginPageState extends State<LoginPage> {
                       // Username Field
                       TextField(
                         controller: _usernameController,
+                        enabled: !_isLoading,
                         decoration: const InputDecoration(
                           labelText: 'Username',
                           border: OutlineInputBorder(),
@@ -183,6 +198,7 @@ class _LoginPageState extends State<LoginPage> {
                       // Password Field
                       TextField(
                         controller: _passwordController,
+                        enabled: !_isLoading,
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           labelText: 'Password',
@@ -207,7 +223,7 @@ class _LoginPageState extends State<LoginPage> {
                         children: [
                           Checkbox(
                             value: _rememberMe,
-                            onChanged: (value) {
+                            onChanged: _isLoading ? null : (value) {
                               setState(() {
                                 _rememberMe = value ?? false;
                               });
@@ -223,7 +239,7 @@ class _LoginPageState extends State<LoginPage> {
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton(
-                          onPressed: _handleLogin,
+                          onPressed: _isLoading ? null : _handleLogin,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue,
                             foregroundColor: Colors.white,
@@ -231,7 +247,16 @@ class _LoginPageState extends State<LoginPage> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: const Text(
+                          child: _isLoading
+                              ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                              : const Text(
                             'Login',
                             style: TextStyle(
                               fontSize: 16,
@@ -242,20 +267,19 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 12),
 
-                      // Quick Login Button
-                      // SizedBox(
-                      //   width: double.infinity,
-                      //   child: TextButton(
-                      //     onPressed: _quickLogin,
-                      //     style: TextButton.styleFrom(
-                      //       foregroundColor: Colors.blue,
-                      //     ),
-                      //     child: const Text(
-                      //       '⚡ Quick Login (Demo)',
-                      //       style: TextStyle(fontSize: 14),
-                      //     ),
-                      //   ),
-                      // ),
+                      // Quick Login Button (opsional - untuk demo)
+                      if (!_isLoading) ...[
+                        SizedBox(
+                          width: double.infinity,
+                          child: TextButton(
+                            onPressed: _quickLogin,
+                            child: const Text(
+                              'Quick Login (Demo)',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
