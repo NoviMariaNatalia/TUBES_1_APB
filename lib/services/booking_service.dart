@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import '../models/booking_model.dart';
 import 'auth_service.dart';
 
@@ -70,6 +71,55 @@ class BookingService {
     });
   }
 
+  // ===== NEW METHOD: Dapatkan hanya booking yang approved =====
+  Stream<List<Booking>> getApprovedBookings() {
+    return _firestore
+        .collection(_collection)
+        .where('status', isEqualTo: 'approved')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return Booking.fromMap(doc.data(), doc.id);
+      }).toList();
+    });
+  }
+
+  // ===== NEW METHOD: Dapatkan approved bookings untuk tanggal tertentu =====
+  Future<List<Map<String, dynamic>>> getApprovedBookingsForDate(DateTime date) async {
+    try {
+      String dateString = DateFormat('dd/MM/yyyy').format(date);
+
+      QuerySnapshot snapshot = await _firestore
+          .collection(_collection)
+          .where('status', isEqualTo: 'approved')
+          .where('tanggalMulai', isEqualTo: dateString)
+          .get();
+
+      return snapshot.docs.map((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+    } catch (e) {
+      print('Error getting approved bookings for date: $e');
+      return [];
+    }
+  }
+
+  // ===== NEW METHOD: Dapatkan semua bookings untuk admin =====
+  Stream<List<Booking>> getAllBookingsForAdmin() {
+    return _firestore
+        .collection(_collection)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return Booking.fromMap(doc.data(), doc.id);
+      }).toList();
+    });
+  }
+
   // Dapatkan booking berdasarkan ID
   Future<Booking?> getBookingById(String id) async {
     try {
@@ -98,12 +148,12 @@ class BookingService {
     });
   }
 
-  // NEW: Dapatkan booking berdasarkan user ID
+  // Dapatkan booking berdasarkan user ID
   Stream<List<Booking>> getBookingsByUserId(String userId) {
     return _firestore
         .collection(_collection)
         .where('userId', isEqualTo: userId)
-        // .orderBy('createdAt', descending: true)
+    // .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) {
@@ -112,7 +162,7 @@ class BookingService {
     });
   }
 
-  // NEW: Dapatkan booking untuk current user yang sedang login
+  // Dapatkan booking untuk current user yang sedang login
   Stream<List<Booking>> getCurrentUserBookings() {
     if (_authService.currentUser == null) {
       // Return empty stream if no user is logged in
@@ -126,6 +176,7 @@ class BookingService {
     try {
       await _firestore.collection(_collection).doc(id).update({
         'status': status,
+        'updatedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
       print('Error update status booking: $e');
